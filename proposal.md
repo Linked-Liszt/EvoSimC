@@ -96,7 +96,7 @@ evosim/
 │   ├── __init__.py
 │   ├── controller.py          # Main evolutionary loop
 │   ├── database.py            # Program database (APL storage/selection)
-│   ├── diff_parser.py         # LLM diff parsing and application
+│   ├── prompt_sampler.py         # Sampling program that generates new APLs
 │   └── evaluator.py           # SimC Docker evaluation
 ├── llm/
 │   ├── __init__.py
