@@ -15,6 +15,14 @@ from .sampling import (
     DiversitySampling
 )
 
+from .prompt_sampler import (
+    PromptSampler,
+    PromptConfig,
+    AdaptivePromptSampler,
+    create_prompt_sampler,
+    DiffApplicationError
+)
+
 __all__ = [
     "ProgramDatabase",
     "APLProgram", 
@@ -22,5 +30,10 @@ __all__ = [
     "FitnessProportionateSampling",
     "TournamentSampling",
     "DiversitySampling",
-    "create_database"
+    "create_database",
+    "PromptSampler",
+    "PromptConfig", 
+    "AdaptivePromptSampler",
+    "create_prompt_sampler",
+    "DiffApplicationError"
 ]
