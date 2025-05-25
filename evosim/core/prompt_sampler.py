@@ -104,7 +104,7 @@ class PromptSampler:
         
         Expected format:
         ```
-        <<<<<<< SEARCH
+        -<<<<<<< SEARCH
         text to find
         =======
         text to replace with
@@ -121,7 +121,7 @@ class PromptSampler:
         
         if not matches:
             # Try alternative pattern without code block markers
-            pattern = r'<<<<<<< SEARCH\s*\n(.*?)\n=======\s*\n(.*?)\n>>>>>>> REPLACE'
+            pattern = r'-<<<<<<< SEARCH\s*\n(.*?)\n=======\s*\n(.*?)\n>>>>>>> REPLACE'
             matches = re.findall(pattern, llm_response, re.DOTALL | re.IGNORECASE)
         
         return [(search.strip(), replace.strip()) for search, replace in matches]
@@ -271,7 +271,7 @@ Common APL syntax:
 Propose improvements to the current APL using the following SEARCH/REPLACE diff format:
 
 ```
-<<<<<<< SEARCH
+-<<<<<<< SEARCH
 # Exact text to find and replace (must match exactly)
 =======  
 # New text to replace it with
@@ -287,7 +287,7 @@ Propose improvements to the current APL using the following SEARCH/REPLACE diff 
 
 **Example:**
 ```
-<<<<<<< SEARCH
+-<<<<<<< SEARCH
 actions=spell1
 actions+=/spell2,if=buff.example.up
 =======

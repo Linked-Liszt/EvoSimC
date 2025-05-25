@@ -41,7 +41,7 @@ Evolutionary Loop (per generation):
    - A detailed prompt will be generated, instructing the LLM to act as an expert SimC APL optimizer.
    - The prompt will provide the parent_program (APL) and its DPS.
    - It will include the inspiration_programs and their DPS.
-   - Crucially, it will instruct the LLM to propose changes to the parent_program in a specific diff format (e.g., AlphaEvolve's <<<<<<<< SEARCH ... ======== ... >>>>>>> REPLACE format).
+   - Crucially, it will instruct the LLM to propose changes to the parent_program in a specific diff format (e.g., AlphaEvolve's -<<<<<<<< SEARCH ... ======== ... >>>>>>> REPLACE format).
    - Contextual information about SimC APL syntax, common optimization goals, and examples of desired diffs will be included.
 
 3. **Creative Generation (LLM-Generated Diffs):**

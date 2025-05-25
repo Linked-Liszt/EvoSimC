@@ -147,7 +147,7 @@ actions+=/spell2,if=buff.up"""
         
         llm_response = """Here's my improvement:
 
-<<<<<<< SEARCH
+-<<<<<<< SEARCH
 actions=spell1
 actions+=/spell2,if=buff.up
 =======
@@ -177,13 +177,13 @@ actions+=/spell2"""
         
         llm_response = """Multiple improvements:
 
-<<<<<<< SEARCH
+-<<<<<<< SEARCH
 actions.precombat=flask
 =======
 actions.precombat=flask,food
 >>>>>>> REPLACE
 
-<<<<<<< SEARCH
+-<<<<<<< SEARCH
 actions+=/spell2
 =======
 actions+=/spell2,if=target.health.pct>20
@@ -207,7 +207,7 @@ actions+=/spell2,if=buff.up"""
         
         # LLM response with slightly different whitespace
         llm_response = """
-<<<<<<< SEARCH
+-<<<<<<< SEARCH
 actions=spell1
 actions+=/spell2,if=buff.up
 =======
@@ -240,7 +240,7 @@ actions+=/spell2,if=buff.up"""
         
         original_code = "actions=spell1"
         llm_response = """
-<<<<<<< SEARCH
+-<<<<<<< SEARCH
 actions=nonexistent_spell
 =======
 actions=spell2
@@ -259,7 +259,7 @@ actions+=/spell1
 actions+=/spell2"""
         
         llm_response = """
-<<<<<<< SEARCH
+-<<<<<<< SEARCH
 spell1
 =======
 spell3
@@ -275,7 +275,7 @@ spell3
         
         original_code = "actions=spell1"
         llm_response = """
-<<<<<<< SEARCH
+-<<<<<<< SEARCH
 
 =======
 actions=spell2
