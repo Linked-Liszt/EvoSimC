@@ -1,0 +1,39 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+
+    - name: Set up Docker for integration tests
+      uses: docker/setup-buildx-action@v3
+
+    - name: Pull SimC image 
+      run: |
+        docker pull simulationcraftorg/simc || echo "Failed to pull SimC image"
+
+    - name: Run unit tests
+      run: |
+        pytest tests/ -v --tb=short 
+
+
+      continue-on-error: true

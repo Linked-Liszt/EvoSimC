@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evosim"
+version = "0.1.0"
+description = "Evolutionary SimulationCraft APL optimization"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "docker>=6.0.0",
+    "pyyaml>=6.0",
+    "numpy>=1.21.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["evosim*"]
+exclude = ["tests*", "config*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+]
+markers = [
+    "unit: Unit tests that don't require external dependencies",
+    "integration: Integration tests that may require Docker or external services",
+    "slow: Tests that take a long time to run",
+]
+
+[tool.coverage.run]
+source = ["evosim"]
+omit = [
+    "tests/*",
+    "*/venv/*",
+    "*/__pycache__/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]

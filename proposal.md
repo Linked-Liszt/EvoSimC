@@ -88,3 +88,28 @@ Evolutionary Loop (per generation):
 2. Robust Diff Application: Creating a reliable system to parse and apply LLM-generated diffs to APL strings, handling potential errors or ambiguities.
 3. Maintaining APL Semantic Correctness: Ensuring that applied diffs result in APLs that are not only syntactically valid but also semantically sensible for SimC.
 4. Balancing Exploration vs. Exploitation: Designing effective selection and population management strategies for the Program Database.
+
+## Current file structure: 
+```
+evosim/
+├── core/
+│   ├── __init__.py
+│   ├── controller.py          # Main evolutionary loop
+│   ├── database.py            # Program database (APL storage/selection)
+│   ├── diff_parser.py         # LLM diff parsing and application
+│   └── evaluator.py           # SimC Docker evaluation
+├── llm/
+│   ├── __init__.py
+│   ├── client.py              # LLM API wrapper
+│   └── prompts.py             # Prompt templates and sampling
+├── simc/
+│   ├── __init__.py
+│   ├── docker_runner.py       # Docker SimC execution
+├── config/
+│   ├── default.yaml           # Default configuration
+│   └── prompts/
+│       └── apl_evolution.txt  # Main evolution prompt template
+├── main.py                    # Entry point
+├── requirements.txt
+└── README.md
+```
