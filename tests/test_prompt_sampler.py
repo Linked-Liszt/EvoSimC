@@ -3,7 +3,7 @@ Test the prompt sampler functionality.
 """
 
 import pytest
-from evosim.entities import APLProgram
+from evosim.entities import APLProgram, SimCResult
 from evosim.core.prompt_sampler import (
     PromptSampler, 
     PromptConfig, 
@@ -69,7 +69,12 @@ class TestPromptSampler:
             dps_score=50000.0,
             generation=1,
             reasoning="Should not appear",
-            evaluation_metadata={"sim_time": 300}
+            simc_result=SimCResult(
+                dps=50000.0,
+                raw_output="test output",
+                errors=[],
+                is_valid=True
+            )
         )
         
         inspirations = [
@@ -90,7 +95,7 @@ class TestPromptSampler:
         
         # Should exclude reasoning and metadata
         assert "Should not appear" not in prompt
-        assert "sim_time" not in prompt
+        assert "test output" not in prompt  # simc_result raw_output should not appear
         assert "SEARCH" not in prompt  # No diff instructions
         
         # Should only include 1 inspiration

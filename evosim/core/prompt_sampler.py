@@ -228,13 +228,12 @@ Common APL syntax:
             if self.config.include_reasoning and program.reasoning:
                 section += f"**Previous reasoning**: {program.reasoning}\n"
             
-            if self.config.include_evaluation_metadata and program.evaluation_metadata:
-                metadata = program.evaluation_metadata
-                if 'sim_time' in metadata:
-                    section += f"**Simulation**: {metadata['sim_time']}s"
-                    if 'iterations' in metadata:
-                        section += f", {metadata['iterations']} iterations"
-                    section += "\n"
+            if self.config.include_evaluation_metadata and program.simc_result:
+                simc_result = program.simc_result
+                section += f"**Simulation**: Valid={simc_result.is_valid}"
+                if hasattr(simc_result, 'errors') and simc_result.errors:
+                    section += f", Errors: {len(simc_result.errors)}"
+                section += "\n"
             
             section += "\n"
         
@@ -246,15 +245,13 @@ Common APL syntax:
         section += "Here is the current APL that needs optimization:\n\n"
         section += f"```\n{parent_program.apl_code}\n```\n"
         
-        if self.config.include_dps_comparison and hasattr(parent_program, 'evaluation_metadata'):
-            metadata = parent_program.evaluation_metadata
-            if metadata:
-                section += "\n**Current Performance**:\n"
-                section += f"- DPS: {parent_program.dps_score:,.1f}\n"
-                if 'sim_time' in metadata:
-                    section += f"- Simulation time: {metadata['sim_time']}s\n"
-                if 'iterations' in metadata:
-                    section += f"- Iterations: {metadata['iterations']}\n"
+        if self.config.include_dps_comparison and parent_program.simc_result:
+            simc_result = parent_program.simc_result
+            section += "\n**Current Performance**:\n"
+            section += f"- DPS: {parent_program.dps_score:,.1f}\n"
+            section += f"- Valid simulation: {simc_result.is_valid}\n"
+            if simc_result.errors:
+                section += f"- Errors: {len(simc_result.errors)}\n"
         
         if self.config.include_reasoning and parent_program.reasoning:
             section += f"\n**Previous reasoning**: {parent_program.reasoning}\n"

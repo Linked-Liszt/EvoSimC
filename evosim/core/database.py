@@ -183,9 +183,9 @@ class ProgramDatabase:
                 dps_score=p_data["dps_score"],
                 generation=p_data["generation"],
                 timestamp=p_data["timestamp"],
-                parent_id=p_data["parent_id"],
-                diff_applied=p_data["diff_applied"],
-                reasoning=p_data["reasoning"],
+                parent_id=p_data.get("parent_id"),
+                diff_applied=p_data.get("diff_applied"),
+                reasoning=p_data.get("reasoning"),
                 simc_result=simc_result,
                 program_id=p_data["program_id"]
             )

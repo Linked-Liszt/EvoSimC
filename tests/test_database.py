@@ -10,7 +10,7 @@ import tempfile
 import os
 from evosim.core.database import ProgramDatabase, create_database
 from evosim.core.sampling import FitnessProportionateSampling, TournamentSampling
-from evosim.entities import APLProgram
+from evosim.entities import APLProgram, SimCResult
 
 class TestProgramDatabase:
     """Test ProgramDatabase core functionality."""
@@ -30,9 +30,16 @@ class TestProgramDatabase:
         """Test adding programs to database."""
         db = ProgramDatabase()
         
+        simc_result = SimCResult(
+            dps=50000.0,
+            raw_output="simulation output",
+            errors=[],
+            is_valid=True
+        )
+        
         program = db.add(
             apl_code="actions=test",
-            evaluation_results={"dps": 50000.0, "sim_time": 300}
+            simc_result=simc_result
         )
         
         assert len(db.programs) == 1
@@ -44,9 +51,16 @@ class TestProgramDatabase:
         """Test adding program with reasoning field."""
         db = ProgramDatabase()
         
+        simc_result = SimCResult(
+            dps=50000.0,
+            raw_output="simulation output",
+            errors=[],
+            is_valid=True
+        )
+        
         program = db.add(
             apl_code="actions=test",
-            evaluation_results={"dps": 50000.0},
+            simc_result=simc_result,
             parent_id="parent_123",
             diff_applied="+ actions.precombat=flask",
             reasoning="Testing flask optimization"
@@ -62,7 +76,13 @@ class TestProgramDatabase:
         
         # Add some test programs
         for i in range(5):
-            db.add(f"actions=test_{i}", {"dps": 50000.0 + i * 1000})
+            simc_result = SimCResult(
+                dps=50000.0 + i * 1000,
+                raw_output="simulation output",
+                errors=[],
+                is_valid=True
+            )
+            db.add(f"actions=test_{i}", simc_result)
         
         parent, inspirations = db.sample(num_inspirations=2)
         
@@ -77,7 +97,13 @@ class TestProgramDatabase:
         # Add programs with different DPS scores
         dps_scores = [45000, 52000, 48000, 55000, 47000]
         for i, dps in enumerate(dps_scores):
-            db.add(f"actions=test_{i}", {"dps": dps})
+            simc_result = SimCResult(
+                dps=dps,
+                raw_output="simulation output",
+                errors=[],
+                is_valid=True
+            )
+            db.add(f"actions=test_{i}", simc_result)
         
         best_3 = db.get_best_programs(3)
         
@@ -98,7 +124,13 @@ class TestProgramDatabase:
         # Add some programs
         dps_scores = [45000, 50000, 55000]
         for dps in dps_scores:
-            db.add("actions=test", {"dps": dps})
+            simc_result = SimCResult(
+                dps=dps,
+                raw_output="simulation output",
+                errors=[],
+                is_valid=True
+            )
+            db.add("actions=test", simc_result)
         
         stats = db.get_statistics()
         assert stats["count"] == 3
@@ -111,12 +143,24 @@ class TestProgramDatabase:
         db = ProgramDatabase()
         
         # Add program in generation 0
-        p1 = db.add("actions=test1", {"dps": 50000})
+        simc_result1 = SimCResult(
+            dps=50000,
+            raw_output="simulation output",
+            errors=[],
+            is_valid=True
+        )
+        p1 = db.add("actions=test1", simc_result1)
         assert p1.generation == 0
         
         # Advance generation and add another
         db.advance_generation()
-        p2 = db.add("actions=test2", {"dps": 51000})
+        simc_result2 = SimCResult(
+            dps=51000,
+            raw_output="simulation output",
+            errors=[],
+            is_valid=True
+        )
+        p2 = db.add("actions=test2", simc_result2)
         assert p2.generation == 1
     
     def test_population_limit(self):
@@ -125,7 +169,13 @@ class TestProgramDatabase:
         
         # Add more programs than limit
         for i in range(5):
-            db.add(f"actions=test_{i}", {"dps": 50000 + i})
+            simc_result = SimCResult(
+                dps=50000 + i,
+                raw_output="simulation output",
+                errors=[],
+                is_valid=True
+            )
+            db.add(f"actions=test_{i}", simc_result)
         
         # Should maintain population limit
         assert len(db.programs) == 3
@@ -143,9 +193,15 @@ class TestDatabasePersistence:
         db = ProgramDatabase()
         
         # Add some test data
+        simc_result = SimCResult(
+            dps=50000,
+            raw_output="simulation output",
+            errors=[],
+            is_valid=True
+        )
         db.add(
             "actions=test",
-            {"dps": 50000, "sim_time": 300},
+            simc_result,
             reasoning="Test program"
         )
         db.advance_generation()
@@ -169,12 +225,12 @@ class TestDatabasePersistence:
         finally:
             os.unlink(filepath)
     
-    def test_backward_compatibility(self):
-        """Test loading files without reasoning field."""
+    def test_new_format_loading(self):
+        """Test loading files with new SimCResult format."""
         db = ProgramDatabase()
         
-        # Simulate old file format without reasoning
-        old_format_data = {
+        # Simulate new file format with SimCResult
+        new_format_data = {
             "max_population": 1000,
             "current_generation": 0,
             "programs": [{
@@ -185,20 +241,27 @@ class TestDatabasePersistence:
                 "timestamp": 1234567890.0,
                 "parent_id": None,
                 "diff_applied": None,
-                # Note: no "reasoning" field
-                "evaluation_metadata": {}
+                "reasoning": "Test program reasoning",
+                "simc_result": {
+                    "dps": 50000.0,
+                    "raw_output": "simulation output",
+                    "errors": [],
+                    "is_valid": True
+                }
             }]
         }
         
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             import json
-            json.dump(old_format_data, f)
+            json.dump(new_format_data, f)
             filepath = f.name
         
         try:
             db.load_from_file(filepath)
             assert len(db.programs) == 1
-            assert db.programs[0].reasoning is None  # Should handle missing field gracefully
+            assert db.programs[0].reasoning == "Test program reasoning"
+            assert db.programs[0].simc_result.dps == 50000.0
+            assert db.programs[0].simc_result.is_valid == True
             
         finally:
             os.unlink(filepath)
@@ -242,7 +305,13 @@ class TestSamplingIntegration:
         
         # Add some test programs
         for i in range(3):
-            db.add(f"actions=test_{i}", {"dps": 50000 + i * 1000})
+            simc_result = SimCResult(
+                dps=50000 + i * 1000,
+                raw_output="simulation output",
+                errors=[],
+                is_valid=True
+            )
+            db.add(f"actions=test_{i}", simc_result)
         
         # Test with fitness strategy
         original_strategy = db.sampling_strategy

@@ -8,39 +8,6 @@ import docker
 import time
 from evosim.simc.simc_runner import SimCRunner, SimCResult
 
-
-class TestSimCResult:
-    """Test the SimCResult dataclass"""
-    
-    def test_simc_result_creation(self):
-        """Test creating a SimCResult instance"""
-        result = SimCResult(
-            dps=12345.67,
-            raw_output="test output",
-            errors=["error1", "error2"],
-            is_valid=True
-        )
-        
-        assert result.dps == 12345.67
-        assert result.raw_output == "test output"
-        assert result.errors == ["error1", "error2"]
-        assert result.is_valid is True
-    
-    def test_simc_result_empty(self):
-        """Test creating an empty/invalid SimCResult"""
-        result = SimCResult(
-            dps=0.0,
-            raw_output="",
-            errors=["Simulation failed"],
-            is_valid=False
-        )
-        
-        assert result.dps == 0.0
-        assert result.raw_output == ""
-        assert len(result.errors) == 1
-        assert result.is_valid is False
-
-
 class TestSimCRunner:
     """Test the SimCRunner class"""
     
