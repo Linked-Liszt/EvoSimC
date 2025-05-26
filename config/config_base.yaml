@@ -4,11 +4,11 @@
 # Evolution parameters
 evolution:
   max_generations: 50          # Maximum number of generations to run
-  num_inspirations: 2          # Number of inspiration programs to include
+  num_inspirations: 5         # Number of inspiration programs to include
   simc_iterations: 1000        # SimC simulation iterations per evaluation
   simc_fight_length: 300       # Fight length in seconds
   verbose: true                # Print generation results
-  early_stopping_generations: 5  # Stop if no improvement for N generations
+  early_stopping_generations: 10  # Stop if no improvement for N generations
   
   # Checkpoint configuration
   checkpoint_interval: 1       # Save checkpoint every 5 generations (0 = no checkpointing)

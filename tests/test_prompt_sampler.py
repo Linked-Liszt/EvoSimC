@@ -345,7 +345,6 @@ class TestPromptContent:
         section_titles = [s.strip().split("\n")[0].strip() for s in sections[1:]]
         
         expected_sections = [
-            "Context: APL Optimization",
             "High-Performing Programs (Inspirations)", 
             "Current Program to Improve",
             "Instructions: Generating Improvements",

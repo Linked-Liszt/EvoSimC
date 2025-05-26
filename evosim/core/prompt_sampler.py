@@ -11,6 +11,7 @@ from typing import List, Optional, Dict, Any, Tuple
 from dataclasses import dataclass
 
 from ..entities import APLProgram
+from .prompts import FULL_PROMPT
 
 
 class DiffApplicationError(Exception):
@@ -193,25 +194,12 @@ class PromptSampler:
         """Build the system instructions for the LLM."""
         return """Act as an expert SimulationCraft APL (Action Priority List) optimizer. Your task is to iteratively improve APL code to maximize DPS (Damage Per Second) output.
 
-You are part of an evolutionary optimization system that continuously improves APL performance through targeted modifications. Your role is to analyze the current APL and propose specific, targeted improvements based on your expertise."""
+You are part of an evolutionary optimization system that continuously improves APL performance through targeted modifications. Your role is to analyze the current APL and propose specific, targeted improvements based on your expertise.
+You are optimizing the APL for a specific class and specialization on a single-target encounter, with the goal of maximizing DPS output."""
     
     def _build_context_section(self) -> str:
         """Build context about APL optimization and SimulationCraft."""
-        return """## Context: APL Optimization
-
-Action Priority Lists (APLs) in SimulationCraft define the decision-making logic for character rotations. Key optimization principles:
-
-- **Priority ordering**: Higher priority actions should be more impactful or situational
-- **Resource management**: Efficiently use energy, rage, mana, or other resources  
-- **Cooldown optimization**: Align powerful cooldowns with damage buffs
-- **Conditional logic**: Use appropriate conditions (buff states, resource levels, cooldowns)
-- **Target selection**: Optimize for single-target vs. multi-target scenarios
-
-Common APL syntax:
-- `actions.precombat=spell1,spell2` - Pre-combat setup
-- `actions=spell,if=condition` - Main rotation with conditions
-- `actions+=/spell,if=condition` - Additional priority items
-- Conditions: `buff.name.up`, `cooldown.spell.ready`, `resource.current>X`, etc."""
+        return FULL_PROMPT
     
     def _build_inspirations_section(self, inspirations: List[APLProgram]) -> str:
         """Build the inspirations section showing high-performing programs."""
@@ -219,7 +207,7 @@ Common APL syntax:
             return "## Inspirations\n\nNo inspiration programs available."
         
         section = "## High-Performing Programs (Inspirations)\n\n"
-        section += "The following APL programs have performed well in recent evaluations:\n\n"
+        section += "The following APL programs have performed well in recent evaluations. Take into account both their implementation and reasoning.\n\n"
         
         for i, program in enumerate(inspirations[:self.config.max_inspirations], 1):
             section += f"### Inspiration {i} (DPS: {program.dps_score:,.1f})\n"

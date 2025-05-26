@@ -2,3 +2,5 @@ AlphaEvolve.txt
 __pycache__
 mlruns
 todos.md
+checkpoints
+.vscode

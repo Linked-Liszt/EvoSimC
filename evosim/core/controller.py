@@ -381,6 +381,7 @@ class EvolutionController:
               f"Parent: {result['parent_dps']:8,.1f} → "
               f"Child: {result['child_dps']:8,.1f} "
               f"({improvement:+7.1f}, {improvement_pct:+5.1f}%)")
+        print(f'Reasoning: {result.get("reasoning", "N/A")}')
     
     def _get_final_results(self) -> Dict[str, Any]:
         """Get final evolution results and statistics."""

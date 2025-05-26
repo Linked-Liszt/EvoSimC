@@ -51,6 +51,8 @@ def create_evolution_config(config_dict: Dict[str, Any]) -> EvolutionConfig:
         num_inspirations=evolution_config.get('num_inspirations', 2),
         simc_iterations=evolution_config.get('simc_iterations', 1000),
         simc_fight_length=evolution_config.get('simc_fight_length', 300),
+        checkpoint_interval=evolution_config.get('checkpoint_interval', 10),
+        checkpoint_path=evolution_config.get('checkpoint_path', 'checkpoints'),
         verbose=evolution_config.get('verbose', True),
         early_stopping_generations=evolution_config.get('early_stopping_generations', 10),
         experiment_name=mlflow_config.get('experiment_name', 'evosim_evolution'),
@@ -227,6 +229,7 @@ def run_evolution(config_file: Path, dry_run: bool = False) -> None:
     except KeyboardInterrupt:
         logger.info("Evolution interrupted by user")
         print("\nEvolution interrupted!")
+        controller.database.save_to_file('checkpoints/interrupted_database.json')
     except Exception as e:
         logger.error(f"Evolution failed: {e}", exc_info=True)
         print(f"Evolution failed: {e}")
