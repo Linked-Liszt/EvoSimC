@@ -6,16 +6,8 @@ import tempfile
 import os
 import re
 import json
-from dataclasses import dataclass
 import evosim.simc.simc_templates as simc_templates
-
-@dataclass
-class SimCResult:
-    """Simple container for SimC simulation results"""
-    dps: float
-    raw_output: str
-    errors: List[str]
-    is_valid: bool
+from ..entities import SimCResult
 
 class SimCRunner:
     """All-in-one SimC runner for APL fitness evaluation"""
@@ -33,14 +25,20 @@ class SimCRunner:
             print(f"Pulling Docker image: {self.image_name}")
             self.docker_client.images.pull(self.image_name)
     
-    def evaluate_apl(self, apl: str, iterations: int = 1000, fight_length: int = 300) -> float:
-        """Evaluate APL and return DPS fitness score"""
+    def evaluate_apl(self, apl: str, iterations: int = 1000, fight_length: int = 300) -> SimCResult:
+        """Evaluate APL and return complete SimC results"""
         try:
             result = self._run_simulation(apl, iterations, fight_length)
-            return result.dps if result.is_valid else 0.0
+            print(result.errors)
+            return result
         except Exception as e:
             print(f"Simulation error: {e}")
-            return 0.0
+            return SimCResult(
+                dps=0.0,
+                raw_output="",
+                errors=[f"Simulation error: {str(e)}"],
+                is_valid=False
+            )
     
     def cleanup(self) -> None:
         """Clean up Docker resources"""

@@ -9,7 +9,8 @@ import random
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .database import SamplingStrategy, APLProgram
+    from .database import SamplingStrategy
+    from ..entities import APLProgram
 
 
 class FitnessProportionateSampling:

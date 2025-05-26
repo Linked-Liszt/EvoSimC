@@ -12,7 +12,7 @@ from evosim.core.controller import (
     EvolutionConfig,
     create_evolution_controller
 )
-from evosim.core.programs import APLProgram
+from evosim.entities import APLProgram
 from evosim.core.database import ProgramDatabase
 from evosim.core.prompt_sampler import PromptSampler, DiffApplicationError
 from evosim.llm import GeminiLLMClient, LLMGenerationError

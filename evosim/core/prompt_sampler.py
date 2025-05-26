@@ -10,7 +10,7 @@ import re
 from typing import List, Optional, Dict, Any, Tuple
 from dataclasses import dataclass
 
-from .programs import APLProgram
+from ..entities import APLProgram
 
 
 class DiffApplicationError(Exception):

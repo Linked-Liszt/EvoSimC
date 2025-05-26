@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple, Dict, Any
 import json
 
-from .programs import APLProgram
+from ..entities import APLProgram, SimCResult
 
 
 class SamplingStrategy(ABC):
@@ -48,7 +48,7 @@ class ProgramDatabase:
         self.sampling_strategy = sampling_strategy
         self.current_generation = 0
         
-    def add(self, apl_code: str, evaluation_results: Dict[str, Any], 
+    def add(self, apl_code: str, simc_result: SimCResult, 
             parent_id: Optional[str] = None, diff_applied: Optional[str] = None,
             reasoning: Optional[str] = None) -> APLProgram:
         """
@@ -56,7 +56,7 @@ class ProgramDatabase:
         
         Args:
             apl_code: The APL code string
-            evaluation_results: Results from SimC evaluation (must contain 'dps')
+            simc_result: Complete SimC evaluation result
             parent_id: ID of parent program (if this is an evolved program)
             diff_applied: The diff that was applied to create this program
             reasoning: LLM's reasoning for the diff/changes made
@@ -64,17 +64,17 @@ class ProgramDatabase:
         Returns:
             The created APLProgram object
         """
-        dps_score = evaluation_results.get('dps', 0.0)
-        
         program = APLProgram(
             apl_code=apl_code,
-            dps_score=dps_score,
+            dps_score=simc_result.dps,
             generation=self.current_generation,
             parent_id=parent_id,
             diff_applied=diff_applied,
             reasoning=reasoning,
-            evaluation_metadata=evaluation_results
+            simc_result=simc_result
         )
+        
+        print(program.apl_code)
         
         self.programs.append(program)
         self._maintain_population_size()
@@ -143,7 +143,12 @@ class ProgramDatabase:
                     "parent_id": p.parent_id,
                     "diff_applied": p.diff_applied,
                     "reasoning": p.reasoning,
-                    "evaluation_metadata": p.evaluation_metadata
+                    "simc_result": {
+                        "dps": p.simc_result.dps,
+                        "raw_output": p.simc_result.raw_output,
+                        "errors": p.simc_result.errors,
+                        "is_valid": p.simc_result.is_valid
+                    } if p.simc_result else None
                 }
                 for p in self.programs
             ]
@@ -162,6 +167,17 @@ class ProgramDatabase:
         
         self.programs = []
         for p_data in data["programs"]:
+            # Reconstruct SimCResult if it exists
+            simc_result = None
+            if p_data.get("simc_result"):
+                simc_data = p_data["simc_result"]
+                simc_result = SimCResult(
+                    dps=simc_data["dps"],
+                    raw_output=simc_data["raw_output"],
+                    errors=simc_data["errors"],
+                    is_valid=simc_data["is_valid"]
+                )
+            
             program = APLProgram(
                 apl_code=p_data["apl_code"],
                 dps_score=p_data["dps_score"],
@@ -169,8 +185,8 @@ class ProgramDatabase:
                 timestamp=p_data["timestamp"],
                 parent_id=p_data["parent_id"],
                 diff_applied=p_data["diff_applied"],
-                reasoning=p_data.get("reasoning"),  # Use .get() for backward compatibility
-                evaluation_metadata=p_data["evaluation_metadata"],
+                reasoning=p_data["reasoning"],
+                simc_result=simc_result,
                 program_id=p_data["program_id"]
             )
             self.programs.append(program)

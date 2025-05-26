@@ -10,7 +10,7 @@ import tempfile
 import os
 from evosim.core.database import ProgramDatabase, create_database
 from evosim.core.sampling import FitnessProportionateSampling, TournamentSampling
-from evosim.core.programs import APLProgram
+from evosim.entities import APLProgram
 
 class TestProgramDatabase:
     """Test ProgramDatabase core functionality."""

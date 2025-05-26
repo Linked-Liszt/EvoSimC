@@ -21,7 +21,7 @@ import mlflow.metrics
 
 from .database import ProgramDatabase
 from .prompt_sampler import PromptSampler, DiffApplicationError
-from .programs import APLProgram
+from ..entities import APLProgram
 from ..llm import GeminiLLMClient, LLMGenerationError
 from ..simc import SimCRunner
 

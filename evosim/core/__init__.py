@@ -2,7 +2,7 @@
 Core components for EvoSimC - LLM-driven evolution of SimulationCraft APLs.
 """
 
-from .programs import APLProgram
+from ..entities import APLProgram
 from .database import (
     ProgramDatabase,
     SamplingStrategy,

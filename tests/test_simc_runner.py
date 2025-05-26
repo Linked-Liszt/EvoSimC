@@ -177,8 +177,10 @@ class TestSimCRunner:
         )
         
         with patch.object(runner, '_run_simulation', return_value=mock_result):
-            dps = runner.evaluate_apl("actions=test_action")
-            assert dps == 15000.0
+            result = runner.evaluate_apl("actions=test_action")
+            assert isinstance(result, SimCResult)
+            assert result.dps == 15000.0
+            assert result.is_valid is True
 
     def test_evaluate_apl_invalid_result(self, mock_docker_client):
         """Test APL evaluation with invalid result"""
@@ -193,8 +195,10 @@ class TestSimCRunner:
         )
         
         with patch.object(runner, '_run_simulation', return_value=mock_result):
-            dps = runner.evaluate_apl("actions=invalid_action")
-            assert dps == 0.0
+            result = runner.evaluate_apl("actions=invalid_action")
+            assert isinstance(result, SimCResult)
+            assert result.dps == 0.0
+            assert result.is_valid is False
 
     def test_evaluate_apl_exception_handling(self, mock_docker_client):
         """Test APL evaluation handles exceptions"""
@@ -202,8 +206,11 @@ class TestSimCRunner:
         
         with patch.object(runner, '_run_simulation', side_effect=Exception("Test error")):
             with patch('builtins.print') as mock_print:
-                dps = runner.evaluate_apl("actions=test_action")
-                assert dps == 0.0
+                result = runner.evaluate_apl("actions=test_action")
+                assert isinstance(result, SimCResult)
+                assert result.dps == 0.0
+                assert result.is_valid is False
+                assert "Test error" in result.errors[0]
                 mock_print.assert_called_with("Simulation error: Test error")
 
 

@@ -3,7 +3,7 @@ Test the prompt sampler functionality.
 """
 
 import pytest
-from evosim.core.programs import APLProgram
+from evosim.entities import APLProgram
 from evosim.core.prompt_sampler import (
     PromptSampler, 
     PromptConfig, 

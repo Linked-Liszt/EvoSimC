@@ -1,7 +1,7 @@
 import pytest
 import tempfile
 import os
-from evosim.core.programs import APLProgram
+from evosim.entities import APLProgram
 
 
 class TestAPLProgram:
