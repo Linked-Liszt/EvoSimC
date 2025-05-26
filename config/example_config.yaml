@@ -1,0 +1,62 @@
+# EvoSimC Configuration Example
+# This file configures all components of the evolutionary APL optimization system
+
+# Evolution parameters
+evolution:
+  max_generations: 50          # Maximum number of generations to run
+  num_inspirations: 2          # Number of inspiration programs to include
+  simc_iterations: 1000        # SimC simulation iterations per evaluation
+  simc_fight_length: 300       # Fight length in seconds
+  verbose: true                # Print generation results
+  early_stopping_generations: 10  # Stop if no improvement for N generations
+
+# Program database configuration
+database:
+  strategy: "fitness"          # Sampling strategy: fitness, tournament, diversity
+  max_population: 1000         # Maximum number of programs to store
+  strategy_params:             # Parameters specific to the sampling strategy
+    temperature: 1.0           # For fitness strategy: temperature scaling
+    # tournament_size: 3       # For tournament strategy: tournament size
+    # diversity_weight: 0.3    # For diversity strategy: weight of diversity vs fitness
+
+# Prompt sampler configuration
+prompt_sampler:
+  type: "basic"                # Type: basic, adaptive
+  params:                      # Parameters for the prompt sampler
+    include_reasoning: true    # Include reasoning from previous iterations
+    include_evaluation_metadata: true  # Include simulation metadata
+    max_inspirations: 3        # Maximum number of inspirations to include
+    diff_format_instructions: true     # Include diff format instructions
+    temperature_instructions: true     # Include temperature/creativity instructions
+
+# LLM configuration
+llm:
+  provider: "gemini"           # LLM provider: gemini
+  model_name: "gemini-2.5-flash-preview-05-20"  # Model name (optional, uses provider default)
+  api_key: null                # API key (optional, uses environment variable)
+  params:                      # LLM-specific parameters
+    temperature: 0.7           # Generation temperature
+    top_p: 0.8                 # Top-p sampling
+    top_k: 40                  # Top-k sampling
+    max_output_tokens: 8192    # Maximum output tokens
+
+# SimulationCraft configuration
+simc:
+  image_name: "simulationcraftorg/simc"  # Docker image for SimC
+  params: {}                   # Additional SimCRunner parameters
+
+# Baseline APL configuration (required)
+baseline:
+  description: "Baseline Evoker APL"
+  # Option 1: Inline APL code
+  apl_code: |
+    actions.precombat=flask
+    actions.precombat+=/food
+    actions=living_flame
+
+
+# MLflow tracking configuration
+mlflow:
+  experiment_name: "evosim_evoker"  # MLflow experiment name
+  tracking_uri: null           # MLflow tracking URI (null = local)
+  log_artifacts: true          # Log APL files and results as artifacts

@@ -57,7 +57,7 @@ class TestGeminiLLMClient:
         with patch.dict(sys.modules, {'google.generativeai': mock_genai}):
             client = GeminiLLMClient(api_key="test_key")
             
-            assert client.model_name == "gemini-1.5-pro"
+            assert client.model_name == "gemini-2.5-flash"
             assert client.api_key == "test_key"
             mock_genai.configure.assert_called_once_with(api_key="test_key")
     
@@ -132,7 +132,7 @@ class TestLLMClientFactory:
             client = create_llm_client("gemini", api_key="test")
             
             assert isinstance(client, GeminiLLMClient)
-            assert client.model_name == "gemini-1.5-pro"
+            assert client.model_name == "gemini-2.5-flash"
     
     def test_create_invalid_provider(self):
         """Test creating client with invalid provider."""

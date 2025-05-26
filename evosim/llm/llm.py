@@ -49,7 +49,7 @@ class GeminiLLMClient:
     Requires google-generativeai package to be installed.
     """
     
-    def __init__(self, model_name: str = "gemini-1.5-pro", api_key: Optional[str] = None, **kwargs):
+    def __init__(self, model_name: str = "gemini-2.5-flash", api_key: Optional[str] = None, **kwargs):
         self.model_name = model_name
         self.api_key = api_key
         self.config = kwargs
@@ -182,7 +182,7 @@ def create_llm_client(provider: str = "gemini", model_name: str = None, **kwargs
         ValueError: If provider is not supported
     """
     if provider.lower() == "gemini":
-        default_model = "gemini-1.5-pro"
+        default_model = "gemini-2.5-flash"
         return GeminiLLMClient(model_name or default_model, **kwargs)
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}. Available: 'gemini'")

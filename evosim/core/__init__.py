@@ -23,6 +23,12 @@ from .prompt_sampler import (
     DiffApplicationError
 )
 
+from .controller import (
+    EvolutionController,
+    EvolutionConfig,
+    create_evolution_controller
+)
+
 __all__ = [
     "ProgramDatabase",
     "APLProgram", 
@@ -35,5 +41,8 @@ __all__ = [
     "PromptConfig", 
     "AdaptivePromptSampler",
     "create_prompt_sampler",
-    "DiffApplicationError"
+    "DiffApplicationError",
+    "EvolutionController",
+    "EvolutionConfig",
+    "create_evolution_controller"
 ]
