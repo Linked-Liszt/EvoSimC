@@ -8,6 +8,7 @@ for generating APL optimization diffs.
 import logging
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
+import mlflow
 
 
 logger = logging.getLogger(__name__)
@@ -56,6 +57,7 @@ class GeminiLLMClient:
         self.usage_stats = LLMUsageStats()
         self._client = None
         self._initialize_client()
+        mlflow.gemini.autolog()
     
     def _initialize_client(self):
         """Initialize the Gemini client."""

@@ -12,7 +12,7 @@ from evosim.core.controller import (
     EvolutionConfig,
     create_evolution_controller
 )
-from evosim.entities import APLProgram
+from evosim.entities import APLProgram, SimCResult
 from evosim.core.database import ProgramDatabase
 from evosim.core.prompt_sampler import PromptSampler, DiffApplicationError
 from evosim.llm import GeminiLLMClient, LLMGenerationError
@@ -80,7 +80,12 @@ class TestEvolutionController:
         
         # Mock SimC runner
         simc_runner = Mock()
-        simc_runner.evaluate_apl.return_value = 51000.0
+        simc_runner.evaluate_apl.return_value = SimCResult(
+            dps=51000.0,
+            raw_output="SimC simulation output",
+            errors=[],
+            is_valid=True
+        )
         
         return {
             'database': database,
@@ -487,7 +492,12 @@ class TestEvolutionControllerIntegration:
         
         # Mock SimC runner
         simc_runner = Mock()
-        simc_runner.evaluate_apl.return_value = 51000.0
+        simc_runner.evaluate_apl.return_value = SimCResult(
+            dps=51000.0,
+            raw_output="SimC simulation output",
+            errors=[],
+            is_valid=True
+        )
         
         return {
             'database': database,
@@ -599,7 +609,12 @@ class TestCreateEvolutionController:
         mock_simc_runner.return_value = mock_simc_runner_instance
         
         # Mock baseline evaluation
-        mock_simc_runner_instance.evaluate_apl.return_value = 50000.0
+        mock_simc_runner_instance.evaluate_apl.return_value = SimCResult(
+            dps=50000.0,
+            raw_output="Simulation completed successfully",
+            errors=[],
+            is_valid=True
+        )
         baseline_program = APLProgram(apl_code="actions=baseline", dps_score=50000.0, generation=0)
         mock_database.add.return_value = baseline_program
         
@@ -639,7 +654,12 @@ class TestCreateEvolutionController:
         mock_simc_runner.return_value = mock_simc_runner_instance
         
         # Mock baseline evaluation
-        mock_simc_runner_instance.evaluate_apl.return_value = 50000.0
+        mock_simc_runner_instance.evaluate_apl.return_value = SimCResult(
+            dps=50000.0,
+            raw_output="Simulation completed successfully",
+            errors=[],
+            is_valid=True
+        )
         baseline_program = APLProgram(apl_code="actions=baseline", dps_score=50000.0, generation=0)
         mock_database.add.return_value = baseline_program
         
@@ -697,7 +717,12 @@ class TestControllerStatistics:
         
         # Mock SimC runner
         simc_runner = Mock()
-        simc_runner.evaluate_apl.return_value = 51000.0
+        simc_runner.evaluate_apl.return_value = SimCResult(
+            dps=51000.0,
+            raw_output="SimC simulation output",
+            errors=[],
+            is_valid=True
+        )
         
         return {
             'database': database,

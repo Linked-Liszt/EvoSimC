@@ -53,8 +53,9 @@ class TestGeminiLLMClient:
         mock_model = Mock()
         mock_genai.GenerativeModel.return_value = mock_model
         
-        # Patch the import in the LLM module
-        with patch.dict(sys.modules, {'google.generativeai': mock_genai}):
+        # Patch the import in the LLM module and mock mlflow
+        with patch.dict(sys.modules, {'google.generativeai': mock_genai}), \
+             patch('mlflow.gemini.autolog'):
             client = GeminiLLMClient(api_key="test_key")
             
             assert client.model_name == "gemini-2.5-flash"
@@ -84,7 +85,8 @@ class TestGeminiLLMClient:
         mock_model._safety_settings = []
         mock_genai.GenerativeModel.return_value = mock_model
         
-        with patch.dict(sys.modules, {'google.generativeai': mock_genai}):
+        with patch.dict(sys.modules, {'google.generativeai': mock_genai}), \
+             patch('mlflow.gemini.autolog'):
             client = GeminiLLMClient()
             response = client.generate("test prompt")
             
@@ -107,7 +109,8 @@ class TestGeminiLLMClient:
         mock_model._safety_settings = []
         mock_genai.GenerativeModel.return_value = mock_model
         
-        with patch.dict(sys.modules, {'google.generativeai': mock_genai}):
+        with patch.dict(sys.modules, {'google.generativeai': mock_genai}), \
+             patch('mlflow.gemini.autolog'):
             client = GeminiLLMClient()
             
             with pytest.raises(LLMGenerationError, match="Gemini generation failed"):
@@ -128,7 +131,8 @@ class TestLLMClientFactory:
         mock_genai = MagicMock()
         mock_genai.GenerativeModel.return_value = Mock()
         
-        with patch.dict(sys.modules, {'google.generativeai': mock_genai}):
+        with patch.dict(sys.modules, {'google.generativeai': mock_genai}), \
+             patch('mlflow.gemini.autolog'):
             client = create_llm_client("gemini", api_key="test")
             
             assert isinstance(client, GeminiLLMClient)
@@ -179,7 +183,8 @@ This adds better cooldown and buff management."""
         mock_model._safety_settings = []
         mock_genai.GenerativeModel.return_value = mock_model
         
-        with patch.dict(sys.modules, {'google.generativeai': mock_genai}):
+        with patch.dict(sys.modules, {'google.generativeai': mock_genai}), \
+             patch('mlflow.gemini.autolog'):
             # Create test data
             parent_program = APLProgram(
                 apl_code="actions.precombat=flask\nactions=spell1\nactions+=/spell2",

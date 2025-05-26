@@ -232,8 +232,11 @@ Common APL syntax:
                 simc_result = program.simc_result
                 section += f"**Simulation**: Valid={simc_result.is_valid}"
                 if hasattr(simc_result, 'errors') and simc_result.errors:
-                    section += f", Errors: {len(simc_result.errors)}"
-                section += "\n"
+                    section += f", Errors: {len(simc_result.errors)}\n"
+                    for error in simc_result.errors:
+                        section += f"  - {error}\n"
+                else:
+                    section += "\n"
             
             section += "\n"
         
@@ -252,6 +255,8 @@ Common APL syntax:
             section += f"- Valid simulation: {simc_result.is_valid}\n"
             if simc_result.errors:
                 section += f"- Errors: {len(simc_result.errors)}\n"
+                for error in simc_result.errors:
+                    section += f"  - {error}\n"
         
         if self.config.include_reasoning and parent_program.reasoning:
             section += f"\n**Previous reasoning**: {parent_program.reasoning}\n"

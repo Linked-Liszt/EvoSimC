@@ -21,7 +21,7 @@ import mlflow.metrics
 
 from .database import ProgramDatabase
 from .prompt_sampler import PromptSampler, DiffApplicationError
-from ..entities import APLProgram
+from ..entities import APLProgram, SimCResult
 from ..llm import GeminiLLMClient, LLMGenerationError
 from ..simc import SimCRunner
 
@@ -38,6 +38,10 @@ class EvolutionConfig:
     simc_fight_length: int = 300
     verbose: bool = True
     early_stopping_generations: int = 10  # Stop if no improvement for N generations
+    
+    # Checkpoint configuration
+    checkpoint_interval: int = 0  # Save checkpoint every K generations (0 = no checkpointing)
+    checkpoint_path: Optional[str] = None  # Path for checkpoint files (auto-generated if None)
     
     # MLflow configuration
     experiment_name: str = "evosim_evolution"
@@ -193,6 +197,9 @@ class EvolutionController:
                 logger.error(f"Error in generation {generation}: {e}")
                 mlflow.log_metric("generation_errors", 1, step=generation)
                 continue
+            
+            # Checkpointing
+            self._checkpoint_database(generation)
         
         # Update database generation counter
         self.database.current_generation = self.stats['generations_run']
@@ -241,22 +248,22 @@ class EvolutionController:
             self.stats['failed_diff_applications'] += 1
             # Create a failed child program with 0 DPS
             child_apl_code = parent_program.apl_code  # Fallback to parent
-            evaluation_results = {'dps': 0.0, 'error': str(e)}
+            simc_result = SimCResult(
+                dps=0.0,
+                raw_output="",
+                errors=[f"Diff application error: {str(e)}"],
+                is_valid=False
+            )
         else:
             # Step 5: Evaluate child program with SimC
             try:
-                child_dps = self.simc_runner.evaluate_apl(
+                simc_result = self.simc_runner.evaluate_apl(
                     child_apl_code,
                     iterations=self.config.simc_iterations,
                     fight_length=self.config.simc_fight_length
                 )
-                evaluation_results = {
-                    'dps': child_dps,
-                    'iterations': self.config.simc_iterations,
-                    'fight_length': self.config.simc_fight_length
-                }
                 
-                if child_dps > 0:
+                if simc_result.dps > 0:
                     self.stats['successful_mutations'] += 1
                 else:
                     self.stats['failed_evaluations'] += 1
@@ -264,12 +271,17 @@ class EvolutionController:
             except Exception as e:
                 logger.warning(f"SimC evaluation failed: {e}")
                 self.stats['failed_evaluations'] += 1
-                evaluation_results = {'dps': 0.0, 'error': str(e)}
+                simc_result = SimCResult(
+                    dps=0.0,
+                    raw_output="",
+                    errors=[f"Simulation error: {str(e)}"],
+                    is_valid=False
+                )
         
         # Step 6: Add child program to database
         child_program = self.database.add(
             apl_code=child_apl_code,
-            evaluation_results=evaluation_results,
+            simc_result=simc_result,
             parent_id=parent_program.program_id,
             diff_applied=diff_response,
             reasoning=self._extract_reasoning(diff_response)
@@ -282,7 +294,7 @@ class EvolutionController:
             'child_dps': child_program.dps_score,
             'inspirations': [p.program_id for p in inspirations],
             'diff_applied': len(diff_response) > 0,
-            'evaluation_success': evaluation_results.get('dps', 0) > 0
+            'evaluation_success': simc_result.is_valid and simc_result.dps > 0
         }
     
     def initialize_with_baseline(self, baseline_apl: str, 
@@ -300,34 +312,28 @@ class EvolutionController:
         logger.info("Evaluating baseline APL...")
         
         try:
-            baseline_dps = self.simc_runner.evaluate_apl(
+            simc_result = self.simc_runner.evaluate_apl(
                 baseline_apl,
                 iterations=self.config.simc_iterations,
                 fight_length=self.config.simc_fight_length
             )
             
-            evaluation_results = {
-                'dps': baseline_dps,
-                'iterations': self.config.simc_iterations,
-                'fight_length': self.config.simc_fight_length
-            }
-            
             baseline_program = self.database.add(
                 apl_code=baseline_apl,
-                evaluation_results=evaluation_results,
+                simc_result=simc_result,
                 reasoning=baseline_description
             )
             
-            self.stats['best_dps_seen'] = baseline_dps
+            self.stats['best_dps_seen'] = simc_result.dps
             
             # Store baseline data for later MLflow logging (when run is active)
             self._baseline_data = {
                 'baseline_apl': baseline_apl,
-                'baseline_dps': baseline_dps,
+                'baseline_dps': simc_result.dps,
                 'baseline_description': baseline_description
             }
             
-            logger.info(f"Baseline APL added: DPS = {baseline_dps:,.1f}")
+            logger.info(f"Baseline APL added: DPS = {simc_result.dps:,.1f}")
             return baseline_program
             
         except Exception as e:
@@ -470,6 +476,41 @@ class EvolutionController:
                 mlflow.end_run()
         except Exception as e:
             logger.warning(f"Error ending MLflow run: {e}")
+    
+    def _checkpoint_database(self, generation: int):
+        """Create a checkpoint of the database at the specified generation."""
+        if self.config.checkpoint_interval <= 0:
+            return
+            
+        if (generation + 1) % self.config.checkpoint_interval == 0:
+            try:
+                # Generate checkpoint filename if not specified
+                if self.config.checkpoint_path:
+                    checkpoint_path = self.config.checkpoint_path
+                else:
+                    # Auto-generate checkpoint path with timestamp and generation
+                    import datetime
+                    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                    checkpoint_path = f"checkpoints/checkpoint_gen{generation + 1:04d}_{timestamp}.json"
+                
+                # Ensure parent directory exists
+                import os
+                os.makedirs(os.path.dirname(checkpoint_path) if os.path.dirname(checkpoint_path) else ".", exist_ok=True)
+                
+                # Save database to checkpoint file
+                self.database.save_to_file(checkpoint_path)
+                
+                logger.info(f"Database checkpoint saved: {checkpoint_path}")
+                
+                # Log checkpoint to MLflow if logging is enabled
+                if self.config.log_artifacts:
+                    try:
+                        mlflow.log_artifact(checkpoint_path, f"checkpoints/generation_{generation + 1:04d}")
+                    except Exception as e:
+                        logger.warning(f"Failed to log checkpoint artifact to MLflow: {e}")
+                        
+            except Exception as e:
+                logger.error(f"Failed to create database checkpoint at generation {generation + 1}: {e}")
 
 
 # Factory function for easy controller creation
